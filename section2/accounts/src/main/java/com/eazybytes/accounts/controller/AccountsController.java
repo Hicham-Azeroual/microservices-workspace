@@ -4,6 +4,10 @@ import com.eazybytes.accounts.constants.AccountsConstants;
 import com.eazybytes.accounts.dto.CustomerDto;
 import com.eazybytes.accounts.dto.ResponseDto;
 import com.eazybytes.accounts.service.IAccountsService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
@@ -14,6 +18,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+
+
+@Tag(
+        name="CRUD REST APIs for Accounts in EazyBank",
+        description="CRUD REST APIs in EazyBank to Create, Update, Fetch and Delete Account Details"
+)
 @RestController
 @RequestMapping(path = "/api", produces = MediaType.APPLICATION_JSON_VALUE)
 @AllArgsConstructor
@@ -21,6 +31,14 @@ import org.springframework.web.bind.annotation.*;
 public class AccountsController {
 
     private IAccountsService accountsService;
+    @Operation(
+            summary = "Create Account",
+            description = "Create Account in EazyBank"
+    )
+    @ApiResponse(
+            responseCode = "201",
+            description = "Http Status CREATED"
+    )
     @PostMapping("/create")
 
     public ResponseEntity<ResponseDto> createAccount(@Valid @RequestBody CustomerDto customerDto) {
@@ -32,15 +50,38 @@ public class AccountsController {
         }
     }
 
+    @Operation(
+            summary = "Fetch Account",
+            description = "Fetch Account in EazyBank"
+    )
+    @ApiResponse(
+            responseCode = "200",
+            description = "Http Status OK"
+    )
     @GetMapping("/fetch")
     public ResponseEntity<CustomerDto> fetchAcountDetails(@RequestParam("mobileNumber")
                                                               @Pattern(regexp = "(^$|[0-9]{10})", message = "Account Number should have 10 digits")
+
                                                               String mobileNumber) {
         CustomerDto customerDto = accountsService.fetchAccount(mobileNumber);
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(customerDto);
     }
+    @Operation(
+            summary = "Update Account",
+            description = "Update Account in EazyBank"
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Http Status OK"
+            ),
+            @ApiResponse(
+                    responseCode = "500",
+                    description = "Http Status INTERNAL_SERVER_ERROR"
+            )
+    })
     @PutMapping("/update")
     public ResponseEntity<ResponseDto> updateAccountDetails(@Valid @RequestBody CustomerDto customerDto) {
         boolean isUpdated = accountsService.updateAccount(customerDto);
@@ -55,6 +96,21 @@ public class AccountsController {
         }
     }
 
+    @Operation(
+            summary = "Delete Account",
+            description = "Delete Account in EazyBank"
+
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Http Status OK"
+            ),
+            @ApiResponse(
+                    responseCode = "500",
+                    description = "Http Status INTERNAL_SERVER_ERROR"
+            )
+    })
     @DeleteMapping("/delete")
     public ResponseEntity<ResponseDto> deleteAccountDetails(@RequestParam("mobileNumber")
                                                                 @Pattern(regexp = "(^$|[0-9]{10})", message = "Account Number should have 10 digits")
