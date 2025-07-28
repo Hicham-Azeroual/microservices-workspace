@@ -1,0 +1,38 @@
+services:
+  accounts:
+    image: hichamazeroual2002/accounts:s4
+    container_name: accounts
+    ports:
+      - "8080:8080"
+    deploy:
+      resources:
+        limits:
+          memory: 400m
+    networks:
+      - bank-network
+  loans:
+    image: hichamazeroual2002/loans:s4
+    container_name: loans
+    ports:
+      - "8090:8090"
+    deploy:
+      resources:
+        limits:
+          memory: 400m
+    networks:
+      - bank-network
+  cards:
+    image: hichamazeroual2002/cards:s4
+    container_name: cards
+    ports:
+      - "9000:9000"
+    deploy:
+      resources:
+        limits:
+          memory: 400m
+    networks:
+      - bank-network
+
+networks:
+  bank-network:
+    driver: bridge
