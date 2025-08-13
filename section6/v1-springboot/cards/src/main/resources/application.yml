@@ -16,6 +16,10 @@ spring:
       hibernate:
         ddl-auto: update
         show-sql: true
+  config:
+    import:
+      - "appplication_qa.yml"
+      - "appplication_prod.yml"
   profiles:
     active:
       - "qa"
