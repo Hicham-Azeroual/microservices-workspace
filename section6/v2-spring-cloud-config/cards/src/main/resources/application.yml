@@ -20,4 +20,4 @@ spring:
         show-sql: true
 
   config:
-    import: "optional: configserver:hhtp://localhost:8071"
+    import: "optional:configserver:http://localhost:8071"

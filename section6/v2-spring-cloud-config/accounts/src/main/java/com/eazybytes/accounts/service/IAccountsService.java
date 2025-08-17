@@ -32,7 +32,4 @@ public interface IAccountsService {
      * @return boolean indicating if the deletion of Account details is successful or not
      */
     boolean deleteAccount(String mobileNumber);
-
-
-
 }
