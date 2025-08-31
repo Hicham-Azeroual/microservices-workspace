@@ -1,0 +1,12 @@
+
+
+build:
+  version: "2.0"
+
+accounts:
+  message: "Welcome to EazyBank accounts related prod APIs "
+  contactDetails:
+    name: "Hicham Azeroual - Developer"
+    email: "hichamazroual2002@gmail.com"
+  onCallSupport:
+    - (+212) 6362233268
