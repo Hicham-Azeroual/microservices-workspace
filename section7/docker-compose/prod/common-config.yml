@@ -1,3 +1,5 @@
+version: '3.8'
+
 services:
   network-deploy-service:
     networks:
@@ -11,14 +13,30 @@ services:
         limits:
           memory: 500m
     environment:
-      SPRING_RABBITMQ_HOST: "rabbit"
+      - SPRING_RABBITMQ_HOST=rabbit
 
   microservice-configserver-config:
     extends:
       service: microservice-base-config
     environment:
-      SPRING_PROFILES_ACTIVE: prod
-      SPRING_CONFIG_IMPORT: configserver:http://configserver:8071/
+      - SPRING_PROFILES_ACTIVE=prod
+      - SPRING_CONFIG_IMPORT=configserver:http://configserver:8071/
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=root
+
+  db-base-config:
+    image: mysql:8.0
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+      start_period: 40s  # Added to allow MySQL sufficient initialization time
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+    command: --default-authentication-plugin=mysql_native_password  # Added for compatibility
+    extends:
+      service: network-deploy-service
 
 networks:
   bank-network:
