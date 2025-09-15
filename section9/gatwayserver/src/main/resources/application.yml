@@ -1,0 +1,35 @@
+spring:
+  application:
+    name: gatwayserver
+
+  config:
+    import: "optional:configserver:http://localhost:8071"
+
+  cloud:
+    discovery:
+      locator:
+        enabled: true
+
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: "guest"
+    password: "guest"
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    gateway:
+      access: unrestricted
+  info:
+    env:
+      enabled: true
+
+info:
+  app:
+    name: "gatwayserver"
+    description: "Gatway Server"
+    version: "1.0.0"
