@@ -6,9 +6,12 @@ spring:
     import: "optional:configserver:http://localhost:8071"
 
   cloud:
-    discovery:
-      locator:
-        enabled: true
+    gateway:
+      webflux:
+        discovery:
+          locator:
+            enabled: true
+            lowerCaseServiceId: true
 
   rabbitmq:
     host: localhost
@@ -33,3 +36,9 @@ info:
     name: "gatwayserver"
     description: "Gatway Server"
     version: "1.0.0"
+
+logging:
+  level:
+    com:
+      eazybytes:
+        gatwayserver: DEBUG
