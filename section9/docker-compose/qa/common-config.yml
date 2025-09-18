@@ -44,7 +44,7 @@ services:
       interval: 10s
       timeout: 10s
       retries: 5
-      start_period: 40s  # Added to allow MySQL sufficient initialization time
+      start_period: 60s  # Added to allow MySQL sufficient initialization time
     environment:
       - MYSQL_ROOT_PASSWORD=root
     command: --default-authentication-plugin=mysql_native_password  # Added for compatibility
