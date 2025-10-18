@@ -13,10 +13,15 @@ services:
     depends_on:
       - minio
     healthcheck:
-      test: [ "CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:3100/ready || exit 1" ]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+      test:
+        [
+          "CMD-SHELL",
+          "wget --no-verbose --tries=1 --spider http://localhost:3100/ready || exit 1",
+        ]
+      interval: 30s
+      timeout: 20s
+      retries: 10
+      start_period: 180s
     networks:
       - bank-network
 
@@ -29,13 +34,18 @@ services:
       - 9095
     volumes:
       - ./observability/loki/loki-config.yaml:/etc/loki/config.yaml
-    healthcheck:
-      test: [ "CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:3100/ready || exit 1" ]
-      interval: 10s
-      timeout: 5s
-      retries: 5
     depends_on:
       - minio
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "wget --no-verbose --tries=1 --spider http://localhost:3100/ready || exit 1",
+        ]
+      interval: 30s
+      timeout: 20s
+      retries: 10
+      start_period: 180s
     networks:
       - bank-network
 
@@ -71,10 +81,11 @@ services:
     volumes:
       - ./.data/minio:/data
     healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:9000/minio/health/live" ]
-      interval: 15s
-      timeout: 20s
-      retries: 5
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 30s
+      retries: 10
+      start_period: 240s
     networks:
       - bank-network
 
@@ -85,6 +96,12 @@ services:
       - "9090:9090"
     volumes:
       - ./observability/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:9090/-/ready"]
+      interval: 30s
+      timeout: 20s
+      retries: 10
+      start_period: 180s
     networks:
       - bank-network
 
@@ -107,10 +124,15 @@ services:
     volumes:
       - ./observability/grafana/datasource.yml:/etc/grafana/provisioning/datasources/datasource.yml
     healthcheck:
-      test: [ "CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:3000/api/health || exit 1" ]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+      test:
+        [
+          "CMD-SHELL",
+          "wget --no-verbose --tries=1 --spider http://localhost:3000/api/health || exit 1",
+        ]
+      interval: 30s
+      timeout: 20s
+      retries: 10
+      start_period: 240s
     networks:
       - bank-network
 
@@ -137,50 +159,32 @@ services:
       - |
         cat <<EOF > /etc/nginx/nginx.conf
         user  nginx;
-        worker_processes  5;  ## Default: 1
-
+        worker_processes  5;
         events {
           worker_connections   1000;
         }
-
         http {
           resolver 127.0.0.11;
-
           server {
-            listen             3100;
-
+            listen 3100;
             location = / {
               return 200 'OK';
               auth_basic off;
             }
-
-            location = /api/prom/push {
-              proxy_pass       http://write:3100\$request_uri;
-            }
-
+            location = /api/prom/push { proxy_pass http://write:3100\$request_uri; }
             location = /api/prom/tail {
-              proxy_pass       http://read:3100\$request_uri;
+              proxy_pass http://read:3100\$request_uri;
               proxy_set_header Upgrade \$http_upgrade;
               proxy_set_header Connection "upgrade";
             }
-
-            location ~ /api/prom/.* {
-              proxy_pass       http://read:3100\$request_uri;
-            }
-
-            location = /loki/api/v1/push {
-              proxy_pass       http://write:3100\$request_uri;
-            }
-
+            location ~ /api/prom/.* { proxy_pass http://read:3100\$request_uri; }
+            location = /loki/api/v1/push { proxy_pass http://write:3100\$request_uri; }
             location = /loki/api/v1/tail {
-              proxy_pass       http://read:3100\$request_uri;
+              proxy_pass http://read:3100\$request_uri;
               proxy_set_header Upgrade \$http_upgrade;
               proxy_set_header Connection "upgrade";
             }
-
-            location ~ /loki/api/.* {
-              proxy_pass       http://read:3100\$request_uri;
-            }
+            location ~ /loki/api/.* { proxy_pass http://read:3100\$request_uri; }
           }
         }
         EOF
@@ -188,10 +192,11 @@ services:
     ports:
       - "3100:3100"
     healthcheck:
-      test: [ "CMD", "service", "nginx", "status" ]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+      test: ["CMD", "service", "nginx", "status"]
+      interval: 30s
+      timeout: 20s
+      retries: 10
+      start_period: 180s
     networks:
       - bank-network
 
@@ -204,6 +209,12 @@ services:
       - "3307:3306"
     environment:
       - MYSQL_DATABASE=accountdb
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 30s
+      timeout: 20s
+      retries: 10
+      start_period: 180s
 
   loansdb:
     extends:
@@ -214,6 +225,12 @@ services:
       - "3308:3306"
     environment:
       - MYSQL_DATABASE=loansdb
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 30s
+      timeout: 20s
+      retries: 10
+      start_period: 180s
 
   cardsdb:
     extends:
@@ -224,19 +241,31 @@ services:
       - "3309:3306"
     environment:
       - MYSQL_DATABASE=cardsdb
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 30s
+      timeout: 20s
+      retries: 10
+      start_period: 180s
 
   rabbit:
-    image: rabbitmq:latest
+    image: rabbitmq:3-management
     hostname: rabbitmq
     ports:
       - "5672:5672"
       - "15672:15672"
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    environment:
+      - RABBITMQ_DEFAULT_USER=admin
+      - RABBITMQ_DEFAULT_PASS=admin
+      - RABBITMQ_ERLANG_COOKIE=SWQOKODSQALRPCLNMEQG
     healthcheck:
-      test: rabbitmq-diagnostics check_port_connectivity
-      interval: 10s
-      timeout: 10s
-      retries: 5
-      start_period: 30s
+      test: rabbitmq-diagnostics -q ping
+      interval: 30s
+      timeout: 30s
+      retries: 10
+      start_period: 240s
     extends:
       file: common-config.yml
       service: network-deploy-service
@@ -250,11 +279,15 @@ services:
       rabbit:
         condition: service_healthy
     healthcheck:
-      test: ["CMD-SHELL", "curl --fail --silent http://localhost:8071/actuator/health/readiness | grep -q '\"status\":\"UP\"' || exit 1"]
-      interval: 10s
-      timeout: 10s
-      retries: 3
-      start_period: 60s
+      test:
+        [
+          "CMD-SHELL",
+          'curl --fail --silent http://localhost:8071/actuator/health/readiness | grep -q ''"status":"UP"'' || exit 1',
+        ]
+      interval: 30s
+      timeout: 20s
+      retries: 10
+      start_period: 240s
     extends:
       file: common-config.yml
       service: microservice-base-config
@@ -264,15 +297,19 @@ services:
     container_name: eurekaserver
     ports:
       - "8070:8070"
-    healthcheck:
-      test: ["CMD-SHELL", "curl --fail --silent http://localhost:8070/actuator/health/readiness | grep -q '\"status\":\"UP\"' || exit 1"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 120s
     depends_on:
       configserver:
         condition: service_healthy
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          'curl --fail --silent http://localhost:8070/actuator/health/readiness | grep -q ''"status":"UP"'' || exit 1',
+        ]
+      interval: 30s
+      timeout: 20s
+      retries: 10
+      start_period: 300s
     environment:
       SPRING_APPLICATION_NAME: "eurekaserver"
     extends:
@@ -288,11 +325,15 @@ services:
       accountdb:
         condition: service_healthy
     healthcheck:
-      test: [ "CMD-SHELL", "curl --fail --silent http://localhost:8080/actuator/health/readiness | grep -q '\"status\":\"UP\"' || exit 1" ]
-      interval: 10s
-      timeout: 10s
-      retries: 5
-      start_period: 120s
+      test:
+        [
+          "CMD-SHELL",
+          'curl --fail --silent http://localhost:8080/actuator/health/readiness | grep -q ''"status":"UP"'' || exit 1',
+        ]
+      interval: 30s
+      timeout: 20s
+      retries: 10
+      start_period: 300s
     environment:
       SPRING_APPLICATION_NAME: "accounts"
       SPRING_DATASOURCE_URL: "jdbc:mysql://accountdb:3306/accountdb"
@@ -309,11 +350,15 @@ services:
       loansdb:
         condition: service_healthy
     healthcheck:
-      test: [ "CMD-SHELL", "curl --fail --silent http://localhost:8090/actuator/health/readiness | grep -q '\"status\":\"UP\"' || exit 1" ]
-      interval: 10s
-      timeout: 10s
-      retries: 5
-      start_period: 120s
+      test:
+        [
+          "CMD-SHELL",
+          'curl --fail --silent http://localhost:8090/actuator/health/readiness | grep -q ''"status":"UP"'' || exit 1',
+        ]
+      interval: 30s
+      timeout: 20s
+      retries: 10
+      start_period: 300s
     environment:
       SPRING_APPLICATION_NAME: "loans"
       SPRING_DATASOURCE_URL: "jdbc:mysql://loansdb:3306/loansdb"
@@ -326,15 +371,19 @@ services:
     container_name: cards
     ports:
       - "9000:9000"
-    healthcheck:
-      test: [ "CMD-SHELL", "curl --fail --silent http://localhost:9000/actuator/health/readiness | grep -q '\"status\":\"UP\"' || exit 1" ]
-      interval: 10s
-      timeout: 10s
-      retries: 5
-      start_period: 120s
     depends_on:
       cardsdb:
         condition: service_healthy
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          'curl --fail --silent http://localhost:9000/actuator/health/readiness | grep -q ''"status":"UP"'' || exit 1',
+        ]
+      interval: 30s
+      timeout: 20s
+      retries: 10
+      start_period: 300s
     environment:
       SPRING_APPLICATION_NAME: "cards"
       SPRING_DATASOURCE_URL: "jdbc:mysql://cardsdb:3306/cardsdb"
@@ -359,6 +408,9 @@ services:
     extends:
       file: common-config.yml
       service: microservice-eureka-config
+
+volumes:
+  rabbitmq_data:
 
 networks:
   bank-network:

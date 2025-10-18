@@ -1,0 +1,42 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+rule_files:
+  # - "first_rules.yml"
+  # - "second_rules.yml"
+
+scrape_configs:
+  - job_name: "prometheus"
+    static_configs:
+      - targets: ["localhost:9090"]
+
+  - job_name: "accounts"
+    static_configs:
+      - targets: ["accounts:8080"]
+    metrics_path: "/actuator/prometheus"
+
+  - job_name: "loans"
+    static_configs:
+      - targets: ["loans:8090"]
+    metrics_path: "/actuator/prometheus"
+
+  - job_name: "cards"
+    static_configs:
+      - targets: ["cards:9000"]
+    metrics_path: "/actuator/prometheus"
+
+  - job_name: "gatewayserver"
+    static_configs:
+      - targets: ["gatwayserver:8072"]
+    metrics_path: "/actuator/prometheus"
+
+  - job_name: "configserver"
+    static_configs:
+      - targets: ["configserver:8071"]
+    metrics_path: "/actuator/prometheus"
+
+  - job_name: "eurekaserver"
+    static_configs:
+      - targets: ["eurekaserver:8070"]
+    metrics_path: "/actuator/prometheus"

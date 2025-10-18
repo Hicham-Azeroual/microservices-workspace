@@ -1,0 +1,17 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - accounts-deployment.yaml
+  - accounts-service.yaml
+  - cards-deployment.yaml
+  - cards-service.yaml
+  - loans-deployment.yaml
+  - loans-service.yaml
+  - configserver-deployment.yaml
+  - configserver-service.yaml
+  - eurekaserver-deployment.yaml
+  - eurekaserver-service.yaml
+  - gatewayserver-deployment.yaml
+  - gatewayserver-service.yaml
+  - eazybank-configmap.yaml

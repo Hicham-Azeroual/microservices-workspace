@@ -37,7 +37,17 @@ management:
       probes:
         enabled: true
 
+  metrics:
+    tags:
+      application: ${spring.application.name}
 
+logging:
+  level:
+    com:
+      eazybytes:
+        configserver: DEBUG
+  pattern:
+    level: "%5p [${spring.application.name},%X{trace_id},%X{span_id}]"
 
 encrypt:
   key: "1M2345ACH01BE2ABCDEFG6538UV9943YZ"

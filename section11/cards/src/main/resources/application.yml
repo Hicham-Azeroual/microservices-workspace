@@ -18,10 +18,10 @@ spring:
   config:
     import: "optional:configserver:http://localhost:8071"
   rabbitmq:
-    host: localhost
+    host: rabbit
     port: 5672
-    username: "guest"
-    password: "guest"
+    username: "admin"
+    password: "admin"
 
 management:
   endpoints:
@@ -42,6 +42,9 @@ management:
   info:
     env:
       enabled: true
+  metrics:
+    tags:
+      application: ${spring.application.name}
 
 eureka:
   instance:
@@ -52,9 +55,18 @@ eureka:
     service-url:
       defaultZone: http://localhost:8070/eureka/
 
-info:
-  app:
-    name: "cards"
-    description: "Cards Service"
-    version: "1.0.0"
+logging:
+  level:
+    com:
+      eazybytes:
+        cards: DEBUG
+  pattern:
+    level: "%5p [${spring.application.name},%X{trace_id},%X{span_id}]"
+  appender:
+    loki:
+      enabled: true
+      url: http://gateway:3100/loki/api/v1/push
+      labels:
+        service: cards
+        environment: prod
 

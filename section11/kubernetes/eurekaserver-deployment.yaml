@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: eurekaserver-deployment
+  labels:
+    app: eurekaserver
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: eurekaserver
+  template:
+    metadata:
+      labels:
+        app: eurekaserver
+    spec:
+      containers:
+        - name: eurekaserver
+          image: hichamazeroual2002/eurekaserver:s11  # Assuming your Docker image name
+          ports:
+            - containerPort: 8761
+          envFrom:
+            - configMapRef:
+                name: eazybank-configmap
