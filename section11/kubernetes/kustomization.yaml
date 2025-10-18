@@ -8,6 +8,9 @@ resources:
   - cards-service.yaml
   - loans-deployment.yaml
   - loans-service.yaml
+  - keycloak-pvc.yaml
+  - keycloak-deployment.yaml
+  - keycloak-service.yaml
   - configserver-deployment.yaml
   - configserver-service.yaml
   - eurekaserver-deployment.yaml
