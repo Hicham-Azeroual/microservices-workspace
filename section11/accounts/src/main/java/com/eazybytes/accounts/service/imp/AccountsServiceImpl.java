@@ -13,22 +13,24 @@ import com.eazybytes.accounts.repository.AccountsRepository;
 import com.eazybytes.accounts.repository.CustomerRepository;
 import com.eazybytes.accounts.service.IAccountsService;
 import lombok.AllArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.cloud.stream.function.StreamBridge;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import com.eazybytes.accounts.dto.AccountsMsgDto;
 
-import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.Random;
 
 @Service
 @AllArgsConstructor
 public class AccountsServiceImpl implements IAccountsService {
-
+    private static final Logger log = LoggerFactory.getLogger(AccountsServiceImpl.class);
     private final CustomerRepository customerRepository;
     private final AccountsRepository accountsRepository;
+    private final StreamBridge streamBridge;
     @Override
     public void createAccount(CustomerDto customerDto) {
-        // TODO: Implement account creation logic here
 
         Customer customer= CustomerMapper.mapToCustomer(customerDto,new Customer());
         Optional<Customer> customerOptional = customerRepository.findByMobileNumber(customerDto.getMobileNumber());
@@ -38,7 +40,14 @@ public class AccountsServiceImpl implements IAccountsService {
 
         customerRepository.save(customer);
         accountsRepository.save(createNewAccount(customer));
-
+        sendCommunication(createNewAccount(customer), customer);
+    }
+private void sendCommunication(Accounts account, Customer customer) {
+        var accountsMsgDto = new AccountsMsgDto(account.getAccountNumber(), customer.getName(),
+                customer.getEmail(), customer.getMobileNumber());
+        log.info("Sending Communication request for the details: {}", accountsMsgDto);
+        var result = streamBridge.send("sendCommunication-out-0", accountsMsgDto);
+        log.info("Is the Communication request successfully triggered ? : {}", result);
     }
     /**
      * @param customer - Customer Object
@@ -83,8 +92,6 @@ public class AccountsServiceImpl implements IAccountsService {
      */
     @Override
     public boolean updateAccount(CustomerDto customerDto) {
-
-        // TODO: Implement account updation logic here
 
         boolean isUpdated = false;
         AccountsDto accountsDto = customerDto.getAccountsDto();

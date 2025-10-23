@@ -16,11 +16,18 @@ spring:
       mode: always
   config:
     import: "optional:configserver:http://localhost:8071/"
+  cloud:
+    stream:
+      bindings:
+        sendCommunication-out-O:
+          destination: send-communication
+          group: ${spring.application.name}
   rabbitmq:
     host: rabbit
     port: 5672
-    username: "admin"
-    password: "admin"
+    username: "guest"
+    password: "guest"
+    connection-timeout: 10s
 
 management:
   endpoints:
