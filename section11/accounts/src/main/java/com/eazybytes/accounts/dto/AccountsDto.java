@@ -33,4 +33,7 @@ public class AccountsDto {
     )
     @NotEmpty(message = "Branch Address should not be empty")
     private String branchAddress;
+
+    @Schema(description = "Communication Status of Account Holder", example = "true")
+    private Boolean communicationSw;
 }

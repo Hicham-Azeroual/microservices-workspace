@@ -39,15 +39,19 @@ public class AccountsServiceImpl implements IAccountsService {
         }
 
         customerRepository.save(customer);
-        accountsRepository.save(createNewAccount(customer));
-        sendCommunication(createNewAccount(customer), customer);
+        Accounts newAccount = createNewAccount(customer);
+        accountsRepository.save(newAccount);
+        sendCommunication(newAccount, customer);
+        streamBridge.send("accounts-out-0", "Account created with account number: " + newAccount.getAccountNumber());
     }
 private void sendCommunication(Accounts account, Customer customer) {
-        var accountsMsgDto = new AccountsMsgDto(account.getAccountNumber(), customer.getName(),
-                customer.getEmail(), customer.getMobileNumber());
-        log.info("Sending Communication request for the details: {}", accountsMsgDto);
-        var result = streamBridge.send("sendCommunication-out-0", accountsMsgDto);
-        log.info("Is the Communication request successfully triggered ? : {}", result);
+        if (account.getCommunicationSw()) {
+            var accountsMsgDto = new AccountsMsgDto(account.getAccountNumber(), customer.getName(),
+                    customer.getEmail(), customer.getMobileNumber());
+            log.info("Sending Communication request for the details: {}", accountsMsgDto);
+            var result = streamBridge.send("sendCommunication-out-0", accountsMsgDto);
+            log.info("Is the Communication request successfully triggered ? : {}", result);
+        }
     }
     /**
      * @param customer - Customer Object
@@ -61,7 +65,7 @@ private void sendCommunication(Accounts account, Customer customer) {
         newAccount.setAccountNumber(randomAccNumber);
         newAccount.setAccountType(AccountsConstants.SAVINGS);
         newAccount.setBranchAddress(AccountsConstants.ADDRESS);
-
+        newAccount.setCommunicationSw(true);
         return newAccount;
     }
     // function details account using the account number
@@ -129,4 +133,12 @@ private void sendCommunication(Accounts account, Customer customer) {
         return isDeleted;
     }
 
+    @Override
+    public void updateCommunicationStatus(Long accountNumber) {
+        Accounts accounts = accountsRepository.findById(accountNumber).orElseThrow(
+                () -> new ResourceNotFoundException("Account", "AccountNumber", accountNumber.toString())
+        );
+        accounts.setCommunicationSw(!accounts.getCommunicationSw());
+        accountsRepository.save(accounts);
+    }
 }

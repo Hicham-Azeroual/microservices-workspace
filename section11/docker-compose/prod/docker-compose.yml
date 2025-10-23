@@ -331,7 +331,10 @@ services:
     depends_on:
       accountdb:
         condition: service_healthy
+      rabbit:
+        condition: service_healthy
     healthcheck:
+    
       test:
         [
           "CMD-SHELL",
@@ -344,6 +347,28 @@ services:
     environment:
       SPRING_APPLICATION_NAME: "accounts"
       SPRING_DATASOURCE_URL: "jdbc:mysql://accountdb:3306/accountdb"
+    extends:
+      file: common-config.yml
+      service: microservice-eureka-config
+
+  message:
+    image: hichamazeroual2002/message:s11
+    container_name: message
+    depends_on:
+      rabbit:
+        condition: service_healthy
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          'curl --fail --silent http://localhost:8080/actuator/health/readiness | grep -q ''"status":"UP"'' || exit 1',
+        ]
+      interval: 30s
+      timeout: 20s
+      retries: 10
+      start_period: 300s
+    environment:
+      SPRING_APPLICATION_NAME: "message"
     extends:
       file: common-config.yml
       service: microservice-eureka-config

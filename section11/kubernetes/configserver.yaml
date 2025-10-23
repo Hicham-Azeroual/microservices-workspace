@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: configserver
-        image: eazybytes/configserver:s12
+        image: hichamazeroual2002/configserver:s11
         ports:
         - containerPort: 8071
 ---

@@ -2,7 +2,7 @@
 $rootDir = 'C:\Users\EliteBook 840 G7\Desktop\microservices\section11'
 
 # Define the list of microservices
-$services = @('accounts', 'cards', 'configserver', 'eurekaserver', 'gatwayserver', 'loans')
+$services = @('accounts', 'cards', 'configserver', 'eurekaserver', 'gatwayserver', 'loans','message')
 
 foreach ($service in $services) {
     Write-Host "----------------------------------------"

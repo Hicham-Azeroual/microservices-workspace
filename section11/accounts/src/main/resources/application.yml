@@ -19,14 +19,19 @@ spring:
   cloud:
     stream:
       bindings:
-        sendCommunication-out-O:
+        updateCommunication-in-0:
+          destination: communication-sent
+          group: ${spring.application.name}
+        sendCommunication-out-0:
           destination: send-communication
+        accounts-in-0:
+          destination: accounts-communication
           group: ${spring.application.name}
   rabbitmq:
-    host: rabbit
+    host: localhost
     port: 5672
-    username: "guest"
-    password: "guest"
+    username: guest
+    password: guest
     connection-timeout: 10s
 
 management:
