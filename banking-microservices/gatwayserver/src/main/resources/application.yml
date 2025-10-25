@@ -1,0 +1,70 @@
+spring:
+  application:
+    name: gatwayserver
+
+  config:
+    import: "optional:configserver:http://localhost:8071"
+
+  cloud:
+    gateway:
+      webflux:
+        discovery:
+          locator:
+            enabled: true
+            lowerCaseServiceId: true
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: "http://localhost:7080/realms/master/protocol/openid-connect/certs"          
+ 
+  rabbitmq:
+    host: rabbit
+    port: 5672
+    username: "guest"
+    password: "guest"
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    gateway:
+      access: unrestricted
+  info:
+    env:
+      enabled: true
+  metrics:
+    tags:
+      application: ${spring.application.name}
+
+info:
+  app:
+    name: "gatwayserver"
+    description: "Gatway Server"
+    version: "1.0.0"
+
+
+resilience4j.circuitbreaker:
+  configs:
+    default:
+      slidingWindowSize: 10
+      permittedNumberOfCallsInHalfOpenState: 2
+      failureRateThreshold: 50
+      waitDurationInOpenState: 10000
+
+logging:
+  level:
+    com:
+      eazybytes:
+        gatwayserver: DEBUG
+  pattern:
+    level: "%5p [${spring.application.name},%X{trace_id},%X{span_id}]"
+  appender:
+    loki:
+      enabled: true
+      url: http://gateway:3100/loki/api/v1/push
+      labels:
+        service: gatwayserver
+        environment: prod
