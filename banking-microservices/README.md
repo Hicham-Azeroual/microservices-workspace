@@ -98,6 +98,12 @@ EazyBank is a comprehensive microservices-based banking application demonstratin
 └─────────────────────────────────────────────────────────────────┘
 ```
 
+### Visual Architecture Diagram
+
+![EazyBank Microservices Architecture](architecture.drawio.png)
+
+_Complete microservices architecture showing Spring Cloud components, Kubernetes deployment, and observability stack_
+
 ---
 
 ## 🛠️ Technology Stack
